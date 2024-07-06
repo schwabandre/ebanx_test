@@ -1,5 +1,7 @@
 Controle de Contas Bancárias com API REST
-Este projeto implementa uma API RESTful para gerenciar contas bancárias e realizar operações como depósitos, saques e transferências. Ele é construído usando Python com o framework Flask.
+
+Este projeto implementa uma API RESTful para gerenciar contas bancárias e realizar operações como depósitos, saques e transferências. 
+Ele é construído usando Python com o framework Flask.
 
 Funcionalidades Implementadas
 Endpoints da API:
@@ -19,4 +21,4 @@ tests/: Diretório contendo testes automatizados para verificar o funcionamento 
 requirements.txt: Lista de dependências Python necessárias para executar o projeto.
 Tecnologias Utilizadas
 Python
-Flask# ebanx_test
+Flask
