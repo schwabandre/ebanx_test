@@ -1,5 +1,5 @@
 import unittest
-from app import app 
+from app import app
 
 class APITestCase(unittest.TestCase):
     def setUp(self):
@@ -30,7 +30,7 @@ class APITestCase(unittest.TestCase):
 
     def test_get_balance_existing_account(self):
         self.app.post('/event', json={"type": "deposit", "destination": "100", "amount": 10})
-        response = self.app.post('/balance?account_id=100')
+        response = self.app.get('/balance?account_id=100')
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.json, {"balance": 10})
 
