@@ -1,41 +1,47 @@
 #Contém lógica de negócios para operações com contas e transações
 
-from models import accounts
+from models import Account, accounts
 
-def reset():
+def reset_system():
     global accounts
     accounts = {}
 
 def get_balance(account_id):
-    if account_id in accounts:
-        return accounts[account_id], 200
-    else:
-        return {"error": "Account not found/Conta nao encontrada"}, 404
+    account = accounts.get(account_id)
+    if account:
+        return account.balance
+    return None
+
+def create_event(event_data):
+    event_type = event_data.get('type')
+    if event_type == 'deposit':
+        destination = event_data.get('destination')
+        amount = event_data.get('amount')
+        if destination not in accounts:
+            accounts[destination] = Account(destination)
+        accounts[destination].deposit(amount)
+        return {"destination": {"id": destination, "balance": accounts[destination].balance}}
     
-def deposit(destination, amount):
-    if destination not in accounts:
-        accounts[destination] = 0
-    accounts[destination] += amount
-    return {'id': destination, 'balance': accounts[destination]}, 201
+    elif event_type == 'withdraw':
+        origin = event_data.get('origin')
+        amount = event_data.get('amount')
+        if origin in accounts and accounts[origin].withdraw(amount):
+            return {"origin": {"id": origin, "balance": accounts[origin].balance}}
+        return {"message": "Insufficient funds or account not found"}
+    
+    elif event_type == 'transfer':
+        origin = event_data.get('origin')
+        destination = event_data.get('destination')
+        amount = event_data.get('amount')
+        if origin in accounts:
+            if destination not in accounts:
+                accounts[destination] = Account(destination)
+            if accounts[origin].withdraw(amount):
+                accounts[destination].deposit(amount)
+                return {
+                    "origin": {"id": origin, "balance": accounts[origin].balance},
+                    "destination": {"id": destination, "balance": accounts[destination].balance}
+                }
+        return {"message": "Insufficient funds or account not found"}
 
-def withdraw(origin, amount):
-    if origin not in accounts:
-        return {"error": "Account not found/Conta nao encontrada"}, 404
-    if accounts[origin] < amount:
-        return {"error": "Insufficient funds/Saldo insuficiente"}, 400
-    accounts[origin] -= amount
-    return {'id': origin, 'balance': accounts[origin]}, 201
-
-def transfer(origin, destination, amount):
-    if origin not in accounts:
-        return {"error": "Origin account not found/Nao foi possível encontrar a origem da conta"}, 404
-    if accounts[origin] < amount:
-        return {"error": "Insufficient funds/Saldo insuficiente"}, 400
-    if destination not in accounts:
-        accounts[destination] = 0
-    accounts[origin] -= amount
-    accounts[destination] += amount
-    return {
-        'origin': {'id': origin, 'balance': accounts[origin]},
-        'destination': {'id': destination, 'balance': accounts[destination]}
-    }, 201
+    return {"message": "Invalid event type"}
